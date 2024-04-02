@@ -12,14 +12,14 @@ const db = mysql.createConnection({
   host: "localhost",
   user: "root",
   password: "",
-  database: "student_course_db",
+  database: "student_class_db",
 });
 
 //get api
 app.get("/students", (req, res) => {
   const query = `
     SELECT 
-        s.Id,
+        s.Student_Id,
         s.Name AS StudentName,
         c.Name AS ClassName,
         s.DOB,
@@ -28,7 +28,7 @@ app.get("/students", (req, res) => {
     FROM 
         student s
     INNER JOIN 
-        class c ON s.ClassId = c.Id
+        class c ON s.Class_Id = c.Class_Id
     `;
   db.query(query, (err, data) => {
     if (err) return res.json(err);
@@ -36,13 +36,13 @@ app.get("/students", (req, res) => {
   });
 });
 
-app.get("/students/:Id", (req, res) => {
-  const { Id } = req.params;
+app.get("/students/:Student_Id", (req, res) => {
+  const { Student_Id } = req.params;
   const query = `
     SELECT 
-        s.Id,
+        s.Student_Id,
         s.Name,
-        s.ClassId,
+        s.Class_Id,
         s.DOB,
         s.Gender,
         s.CreatedDate,
@@ -50,27 +50,27 @@ app.get("/students/:Id", (req, res) => {
     FROM 
         student s
     WHERE 
-        s.Id = ?
+        s.Student_Id = ?
     `;
-  db.query(query, [Id], (err, data) => {
+  db.query(query, [Student_Id], (err, data) => {
     if (err) return res.json(err);
     return res.json(data[0]);
   });
 });
 
 //update api
-app.put("/edit/:Id", (req, res) => {
-  const { Id } = req.params;
+app.put("/edit/:Student_Id", (req, res) => {
+  const { Student_Id } = req.params;
   const { name, classId, dob, gender } = req.body;
 
   const modifiedDate = new Date().toISOString().slice(0, 19).replace("T", " ");
   const genderValue = gender === "male" ? 1 : 2;
 
   const sql =
-    "UPDATE Student SET Name = ?, ClassId = ?, DOB = ?, Gender = ?,ModificationDate=? WHERE Id = ?";
+    "UPDATE Student SET Name = ?, Class_Id = ?, DOB = ?, Gender = ?,ModificationDate=? WHERE Student_Id = ?";
   db.query(
     sql,
-    [name, classId, dob, genderValue, modifiedDate, Id],
+    [name, classId, dob, genderValue, modifiedDate, Student_Id],
     (err, result) => {
       if (err) return res.json(err);
       return res.json("updated");
@@ -85,7 +85,7 @@ app.post("/create", (req, res) => {
   const createdDate = new Date().toISOString().slice(0, 19).replace("T", " ");
   const genderValue = gender === "male" ? 1 : 2;
   const sql =
-    "INSERT INTO Student (Name, Gender, DOB, ClassId, CreatedDate) VALUES (?, ?, ?, ?, ?)";
+    "INSERT INTO Student (Name, Gender, DOB, Class_Id, CreatedDate) VALUES (?, ?, ?, ?, ?)";
   db.query(
     sql,
     [name, genderValue, dob, classId, createdDate],
@@ -97,11 +97,11 @@ app.post("/create", (req, res) => {
 });
 
 //delete api
-app.delete("/students/:Id", (req, res) => {
-  const { Id } = req.params;
+app.delete("/students/:Student_Id", (req, res) => {
+  const { Student_Id } = req.params;
 
-  const sql = "DELETE FROM Student WHERE Id = ?";
-  db.query(sql, [Id], (err, result) => {
+  const sql = "DELETE FROM Student WHERE Student_Id = ?";
+  db.query(sql, [Student_Id], (err, result) => {
     if (err) return res.json(err);
     return res.json("deleted");
   });
